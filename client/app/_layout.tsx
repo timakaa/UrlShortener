@@ -14,10 +14,11 @@ import { useColorScheme } from "nativewind";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import "../global.css";
+import { AuthProvider, useAuth } from "@/context/AuthContext";
+import { router } from "expo-router";
 
 export {
   // Catch any errors thrown by the Layout component.
-  // @ts-expect-error
   ErrorBoundary,
 } from "expo-router";
 
@@ -29,32 +30,13 @@ export const unstable_settings = {
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const { colorScheme, toggleColorScheme } = useColorScheme();
-
-  const loadTheme = async () => {
-    try {
-      const savedTheme = await AsyncStorage.getItem("theme");
-      if (savedTheme !== null) {
-        const isDark = savedTheme === "dark";
-        if (isDark !== (colorScheme === "dark")) {
-          toggleColorScheme();
-        }
-      }
-    } catch (error) {
-      console.error("Ошибка при загрузке темы:", error);
-    }
-  };
-
-  useEffect(() => {
-    loadTheme();
-  }, []);
-
   const [loaded, error] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
     ...FontAwesome.font,
   });
 
-  // Expo Router uses Error Boundaries to catch errors in the navigation tree.
+  const { colorScheme } = useColorScheme();
+
   useEffect(() => {
     if (error) throw error;
   }, [error]);
@@ -69,17 +51,14 @@ export default function RootLayout() {
     return null;
   }
 
-  return <RootLayoutNav />;
-}
-
-function RootLayoutNav() {
-  const { colorScheme } = useColorScheme();
-
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
-      </Stack>
-    </ThemeProvider>
+    <AuthProvider>
+      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+        <Stack>
+          <Stack.Screen name='(auth)' options={{ headerShown: false }} />
+          <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
+        </Stack>
+      </ThemeProvider>
+    </AuthProvider>
   );
 }

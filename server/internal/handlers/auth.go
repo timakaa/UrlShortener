@@ -42,7 +42,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	var user models.User
 	result := db.GetDB().Where("email = ?", email).First(&user)
-	if result.Error != nil {
+	if result.Error != nil || !user.Verified {
 		http.Error(w, "User not found", http.StatusNotFound)
 		return
 	}
@@ -75,7 +75,9 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	})
 
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("Login successful"))
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"token": tokenString,
+	})
 }
 
 func GenerateVerificationCode() string {
@@ -246,6 +248,7 @@ func VerifyAndRegisterHandler(w http.ResponseWriter, r *http.Request) {
 		Username: tempData.Username,
 		Email:    tempData.Email,
 		Password: string(hashedPassword),
+		Verified: true,
 	}
 
 	if err := db.GetDB().Create(&user).Error; err != nil {

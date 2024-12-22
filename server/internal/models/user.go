@@ -7,6 +7,7 @@ type User struct {
 	Username string `gorm:"unique;not null" json:"username" validate:"required,min=3,max=50"`
 	Email    string `gorm:"unique;not null" json:"email" validate:"required,email"`
 	Password string `gorm:"not null" json:"password" validate:"required,min=6"`
+	Verified bool   `gorm:"not null;default:false" json:"verified"`
 }
 
 // Для запросов регистрации (чтобы не использовать основную модель)

@@ -1,23 +1,46 @@
-import React from "react";
+import React, { useEffect } from "react";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { Tabs } from "expo-router";
+import { Tabs, Redirect } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { Platform, Pressable } from "react-native";
+import {
+  Platform,
+  Pressable,
+  StyleProp,
+  View,
+  ViewStyle,
+  ActivityIndicator,
+} from "react-native";
 
 import Colors from "@/constants/Colors";
 import { useColorScheme } from "@/components/useColorScheme";
 import { useClientOnlyValue } from "@/components/useClientOnlyValue";
+import { useAuth } from "@/context/AuthContext";
 
 // You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
 function TabBarIcon(props: {
   name: React.ComponentProps<typeof FontAwesome>["name"];
   color: string;
+  className?: string;
+  style?: StyleProp<ViewStyle>;
 }) {
   return <FontAwesome size={28} style={{ marginBottom: -3 }} {...props} />;
 }
 
 export default function TabLayout() {
+  const { isAuthenticated, isLoading } = useAuth();
   const colorScheme = useColorScheme();
+
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size='large' />
+      </View>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <Redirect href='/(auth)/login' />;
+  }
 
   return (
     <>
@@ -25,9 +48,10 @@ export default function TabLayout() {
       <Tabs
         screenOptions={{
           tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
-          // Disable the static render of the header on web
-          // to prevent a hydration error in React Navigation v6.
           headerShown: useClientOnlyValue(false, true),
+          tabBarIconStyle: {
+            marginBottom: 4,
+          },
           tabBarStyle: Platform.select({
             ios: {
               position: "absolute",
@@ -49,9 +73,22 @@ export default function TabLayout() {
         <Tabs.Screen
           name='index'
           options={{
-            title: "Weather",
+            title: "Url",
             tabBarIcon: ({ color }) => (
-              <TabBarIcon name='cloud' color={color} />
+              <View className='rotate-[135deg]'>
+                <TabBarIcon name='link' color={color} />
+              </View>
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name='profile'
+          options={{
+            title: "Profile",
+            tabBarIcon: ({ color }) => (
+              <View>
+                <TabBarIcon name='user-circle' color={color} />
+              </View>
             ),
           }}
         />

@@ -3,7 +3,14 @@
  * https://docs.expo.io/guides/color-schemes/
  */
 
-import { Text as DefaultText, View as DefaultView } from "react-native";
+import { cn } from "@/lib/utlis";
+import React from "react";
+import {
+  Text as DefaultText,
+  View as DefaultView,
+  TextInput as DefaultTextInput,
+  TextInputProps,
+} from "react-native";
 
 type ThemeProps = {
   className?: string;
@@ -17,7 +24,7 @@ export function Text(props: TextProps) {
 
   return (
     <DefaultText
-      className={`text-black dark:text-white ${className || ""}`}
+      className={cn("text-black dark:text-white", className)}
       {...otherProps}
     />
   );
@@ -28,7 +35,21 @@ export function View(props: ViewProps) {
 
   return (
     <DefaultView
-      className={["bg-white dark:bg-black", className].join(" ")}
+      className={cn("bg-white dark:bg-black", className)}
+      {...otherProps}
+    />
+  );
+}
+
+export function TextInput(props: TextInputProps) {
+  const { className, ...otherProps } = props;
+
+  return (
+    <DefaultTextInput
+      className={cn(
+        "bg-white border placeholder:text-gray-600 border-gray-600 p-3 rounded-md dark:bg-black dark:text-white",
+        className,
+      )}
       {...otherProps}
     />
   );
