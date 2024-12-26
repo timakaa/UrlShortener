@@ -73,3 +73,14 @@ export const useGetUrls = () => {
     retry: false,
   });
 };
+
+export const useGetUrl = (shortUrl: string) => {
+  return useQuery({
+    queryKey: ["url", shortUrl],
+    queryFn: async () => {
+      const response = await fetch(`${API_URL}/url?code=${shortUrl}`);
+      const data = await response.json();
+      return data;
+    },
+  });
+};

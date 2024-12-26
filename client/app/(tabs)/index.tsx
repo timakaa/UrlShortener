@@ -1,5 +1,5 @@
 import { View, Text, TextInput } from "@/components/Themed";
-import Button from "@/components/Button";
+import Button, { ButtonText } from "@/components/Button";
 import Urls from "@/components/Urls";
 import { useCreateUrl } from "@/hooks/url.hooks";
 import { useState } from "react";
@@ -41,12 +41,12 @@ function ScreenWithProvider() {
           onChangeText={setUrl}
         />
         <Button
-          className='bg-blue-500 text-white py-3 px-6 rounded-md'
+          className='bg-blue-500 py-3 px-6 rounded-md'
           onPress={() => {
             createUrl(url);
           }}
         >
-          <Text className='text-lg font-bold'>Create</Text>
+          <ButtonText className='text-lg font-bold'>Create</ButtonText>
         </Button>
       </View>
       <View className='my-10 flex-row items-center gap-x-4'>

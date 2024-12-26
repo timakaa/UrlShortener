@@ -1,4 +1,4 @@
-export interface Url {
+export interface IUrl {
   ID: string;
   original_url: string;
   short_url: string;

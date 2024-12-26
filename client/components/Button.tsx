@@ -1,5 +1,11 @@
+import { cn } from "@/lib/utlis";
 import React from "react";
-import { TouchableOpacity, TouchableOpacityProps } from "react-native";
+import {
+  TextProps,
+  TouchableOpacity,
+  TouchableOpacityProps,
+} from "react-native";
+import { Text } from "./Themed";
 
 const Button = (
   props: TouchableOpacityProps & {
@@ -11,7 +17,7 @@ const Button = (
 
   return (
     <TouchableOpacity
-      className={`bg-blue-500 p-3 rounded-md ${className || ""}`}
+      className={cn("bg-blue-500 !text-white p-3 rounded-md", className)}
       {...otherProps}
     >
       {children}
@@ -20,3 +26,12 @@ const Button = (
 };
 
 export default Button;
+
+export const ButtonText = (props: TextProps) => {
+  const { children, ...otherProps } = props;
+  return (
+    <Text {...otherProps} className={cn(otherProps.className, "text-white")}>
+      {children}
+    </Text>
+  );
+};
