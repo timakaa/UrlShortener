@@ -2,15 +2,19 @@ import React from "react";
 import { Text, View } from "@/components/Themed";
 import Button from "@/components/Button";
 import { useAuth } from "@/context/AuthContext";
+import { MaterialIcons } from "@expo/vector-icons";
 
 const Profile = () => {
   const { logout } = useAuth();
 
   return (
     <View className='flex-1'>
-      <Text>Profile</Text>
-      <Button onPress={logout}>
+      <Button
+        className='w-1/2 justify-between flex-row items-center mt-10 mx-auto'
+        onPress={logout}
+      >
         <Text>Logout</Text>
+        <MaterialIcons name='exit-to-app' size={20} color='white' />
       </Button>
     </View>
   );

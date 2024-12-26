@@ -10,6 +10,7 @@ import {
   View as DefaultView,
   TextInput as DefaultTextInput,
   TextInputProps,
+  ScrollView as DefaultScrollView,
 } from "react-native";
 
 type ThemeProps = {
@@ -18,7 +19,7 @@ type ThemeProps = {
 
 export type TextProps = ThemeProps & DefaultText["props"];
 export type ViewProps = ThemeProps & DefaultView["props"];
-
+export type ScrollViewProps = ThemeProps & DefaultScrollView["props"];
 export function Text(props: TextProps) {
   const { className, ...otherProps } = props;
 

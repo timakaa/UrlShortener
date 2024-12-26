@@ -10,13 +10,21 @@ import (
 	"strconv"
 )
 
+type methodHandler struct {
+	handlers map[string]http.HandlerFunc
+}
+
 type Server struct {
 	globalMiddleware []func(http.HandlerFunc) http.HandlerFunc
+	handlers        map[string]*methodHandler
+	mux            *http.ServeMux
 }
 
 func New() *Server {
 	return &Server{
 		globalMiddleware: make([]func(http.HandlerFunc) http.HandlerFunc, 0),
+		handlers:        make(map[string]*methodHandler),
+		mux:            http.NewServeMux(),
 	}
 }
 
@@ -39,42 +47,48 @@ func Chain(middlewares ...func(http.HandlerFunc) http.HandlerFunc) func(http.Han
 }
 
 // Handle registers a new route with middleware
-func (s *Server) Handle(pattern string, handler http.HandlerFunc, middleware ...func(http.HandlerFunc) http.HandlerFunc) {
+func (s *Server) Handle(pattern string, method string, handler http.HandlerFunc, middleware ...func(http.HandlerFunc) http.HandlerFunc) {
+	if s.handlers[pattern] == nil {
+		s.handlers[pattern] = &methodHandler{
+			handlers: make(map[string]http.HandlerFunc),
+		}
+		// Register the pattern only once
+		s.mux.HandleFunc(pattern, s.handlers[pattern].ServeHTTP)
+	}
+
 	// Combine global and route-specific middleware
 	allMiddleware := append(s.globalMiddleware, middleware...)
 	
-	// Use the Chain helper to combine all middleware
-	http.HandleFunc(pattern, Chain(allMiddleware...)(handler))
+	// Store the handler with middleware
+	s.handlers[pattern].handlers[method] = Chain(allMiddleware...)(handler)
+}
+
+func (mh *methodHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if handler, ok := mh.handlers[r.Method]; ok {
+		handler(w, r)
+		return
+	}
+	http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 }
 
 // GET registers a GET route
 func (s *Server) GET(pattern string, handler http.HandlerFunc, middleware ...func(http.HandlerFunc) http.HandlerFunc) {
-	s.Handle(pattern, methodMiddleware("GET", handler), middleware...)
+	s.Handle(pattern, http.MethodGet, handler, middleware...)
 }
 
 // POST registers a POST route
 func (s *Server) POST(pattern string, handler http.HandlerFunc, middleware ...func(http.HandlerFunc) http.HandlerFunc) {
-	s.Handle(pattern, methodMiddleware("POST", handler), middleware...)
+	s.Handle(pattern, http.MethodPost, handler, middleware...)
 }
 
 // DELETE registers a DELETE route
 func (s *Server) DELETE(pattern string, handler http.HandlerFunc, middleware ...func(http.HandlerFunc) http.HandlerFunc) {
-	s.Handle(pattern, methodMiddleware("DELETE", handler), middleware...)
+	s.Handle(pattern, http.MethodDelete, handler, middleware...)
 }
 
 // PUT registers a PUT route
 func (s *Server) PUT(pattern string, handler http.HandlerFunc, middleware ...func(http.HandlerFunc) http.HandlerFunc) {
-	s.Handle(pattern, methodMiddleware("PUT", handler), middleware...)
-}
-
-func methodMiddleware(method string, handler http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != method {
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-			return
-		}
-		handler(w, r)
-	}
+	s.Handle(pattern, http.MethodPut, handler, middleware...)
 }
 
 // isPortAvailable checks if the port is available for use
@@ -113,7 +127,7 @@ func (s *Server) ListenAndServe() error {
 	
 	server := &http.Server{
 		Addr:    address,
-		Handler: nil, // Use default ServeMux
+		Handler: s.mux, // Use our custom mux instead of default ServeMux
 	}
 	
 	return server.ListenAndServe()

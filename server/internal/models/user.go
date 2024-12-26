@@ -8,6 +8,7 @@ type User struct {
 	Email    string `gorm:"unique;not null" json:"email" validate:"required,email"`
 	Password string `gorm:"not null" json:"password" validate:"required,min=6"`
 	Verified bool   `gorm:"not null;default:false" json:"verified"`
+	Urls     []Url  `json:"urls" gorm:"foreignKey:UserID"`
 }
 
 // Для запросов регистрации (чтобы не использовать основную модель)

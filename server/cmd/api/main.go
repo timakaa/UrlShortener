@@ -32,14 +32,14 @@ func main() {
 		middleware.SecurityMiddleware(),
 	)
 
-	srv.GET("/", handlers.HomeHandler)
 	srv.GET("/api/hello", handlers.HelloHandler, middleware.AuthMiddleware())
 	srv.POST("/api/login", handlers.LoginHandler)
 	srv.POST("/api/register/init", handlers.RegisterInitHandler)
 	srv.POST("/api/register/verify", handlers.VerifyAndRegisterHandler)
 	srv.POST("/api/logout", handlers.LogoutHandler)
-	// srv.POST("/api/url", handlers.CreateUrlHandler, middleware.AuthMiddleware())
-	// srv.GET("/api/url", handlers.GetUrlHandler, middleware.AuthMiddleware())
-	
+	srv.POST("/api/url", handlers.CreateUrlHandler, middleware.AuthMiddleware())
+	srv.GET("/api/url", handlers.GetUrlHandler)
+	srv.GET("/api/urls", handlers.GetUrlsHandler, middleware.AuthMiddleware())
+
 	srv.ListenAndServe()
 }
